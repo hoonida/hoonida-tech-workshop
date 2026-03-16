@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Max 9 — 기초 오브젝트 레퍼런스</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Barlow+Condensed:wght@700;900&display=swap');
+
+:root {
+  /* ── OFF Store 라임그린 팔레트 ── */
+  --bg:        #f5f0e8;   /* 크림 */
+  --bg-deep:   #ede8dc;   /* 크림 딥 */
+  --bg-light:  #faf6ee;   /* 크림 라이트 */
+  --surface:   rgba(255,255,255,0.55);
+  --surface2:  rgba(255,255,255,0.70);
+  --groove:    rgba(20,40,0,0.15);
+  --rule:      rgba(20,40,0,0.2);
+  --rule-d:    rgba(20,40,0,0.38);
+
+  /* ── 텍스트: 딥 다크 그린 ── */
+  --ink:       #182808;
+  --ink2:      #223010;
+  --ink3:      #2e3e18;
+  --muted:     rgba(20,40,0,0.58);
+  --muted2:    rgba(20,40,0,0.42);
+
+  /* ── 액센트: 오렌지 (#e85018) ── */
+  --neon:      #e85018;   /* 오렌지 메인 액센트 */
+  --neon2:     #d44010;   /* 진한 오렌지 */
+  --neon3:     #ff6830;   /* 밝은 오렌지 */
+  --neon-dim:  rgba(232,80,24,0.12);
+  --neon-glow: rgba(232,80,24,0.3);
+  --orange:    #182808;   /* 다크 그린 (텍스트 강조용) */
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: rgba(20,40,0,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon); }
+
+/* ── MASTHEAD ── */
+.masthead {
+  padding: 48px 64px 40px;
+  background: var(--bg-deep);
+  border-bottom: 2px solid rgba(20,40,0,0.3);
+  position: relative;
+  overflow: hidden;
+}
+.masthead::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 5px;
+  background: linear-gradient(to bottom, var(--neon), var(--neon2));
+}
+.mh-kicker {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 14px;
+  padding-left: 20px;
+  font-weight: 600;
+}
+.mh-kicker span { color: var(--neon); font-weight:900; }
+.masthead h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(36px, 5.5vw, 72px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  line-height: 1.08;
+  color: var(--ink);
+  padding-left: 20px;
+  margin-bottom: 16px;
+}
+.masthead h1 em { font-style: normal; color: var(--neon); text-shadow: 0 0 0px transparent; }
+.mh-desc {
+  padding-left: 20px;
+  max-width: 620px;
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.85;
+}
+.mh-quote {
+  margin-top: 20px;
+  padding: 14px 20px;
+  padding-left: 20px;
+  border-left: 3px solid var(--neon);
+  background: rgba(20,40,0,0.06);
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.8;
+  max-width: 680px;
+  margin-left: 20px;
+  font-style: italic;
+}
+
+/* ── FILTER NAV ── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 10px 64px;
+  background: var(--bg-deep);
+  border-bottom: 2px solid rgba(20,40,0,0.18);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.filter-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-right: 6px;
+  font-weight: 700;
+}
+.flt-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px; font-weight: 500;
+  color: var(--ink2);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 5px 12px 5px 9px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.flt-btn:hover {
+  background: rgba(232,80,24,0.1);
+  color: var(--neon);
+  border-color: rgba(232,80,24,0.4);
+  transform: translateY(-1px);
+}
+.flt-btn.active {
+  background: var(--neon);
+  color: #ffffff;
+  border-color: var(--neon2);
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(232,80,24,0.35);
+}
+.flt-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── SECTION ── */
+.section {
+  padding: 52px 64px;
+  border-top: 2px solid rgba(20,40,0,0.15);
+}
+.section.alt { background: rgba(20,40,0,0.04); }
+.sec-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--neon);
+  margin-bottom: 8px;
+  font-weight: 700;
+  opacity: 1;
+  text-shadow: none;
+}
+.sec-h {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  line-height: 1.0;
+  color: var(--ink);
+  margin-bottom: 6px;
+  text-shadow: none;
+  font-weight: 900;
+}
+.sec-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  color: var(--ink3);
+  margin-bottom: 32px;
+  line-height: 1.7;
+  max-width: 720px;
+}
+
+/* ── OBJECT GRID ── */
+.obj-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+/* ── OBJECT CARD ── */
+.obj-card {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(20,40,0,0.18);
+  border-left: 3px solid var(--neon);
+  border-radius: 3px;
+  padding: 0;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+  position: relative;
+}
+.obj-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(20,40,0,0.2), 0 0 0 1px rgba(20,40,0,0.3);
+}
+.obj-card.expanded { border-left-color: var(--orange); }
+
+.card-header {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.06);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+.card-header:hover {
+  background: rgba(232,80,24,0.08);
+}
+.obj-card.expanded .card-header {
+  background: rgba(30,10,0,0.1);
+  border-bottom-color: rgba(20,40,0,0.25);
+}
+/* card-body 내부는 기본 커서 */
+.card-body * { cursor: default; }
+.max-bang, .max-toggle, .max-msg, .max-slider, .flt-btn,
+.counter-btn, .piano-key, [onclick], input, select, canvas { cursor: pointer !important; }
+input[type="number"], input[type="range"] { cursor: ew-resize !important; }
+.obj-icon {
+  width: 38px; height: 38px;
+  border-radius: 3px;
+  border: 1.5px solid var(--neon);
+  background: rgba(232,80,24,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--neon);
+  flex-shrink: 0;
+  text-shadow: none;
+}
+.obj-name-wrap { flex: 1; min-width: 0; }
+.obj-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.obj-type-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--neon);
+  border: 1px solid rgba(232,80,24,0.4);
+  padding: 1px 6px;
+  border-radius: 1px;
+  background: rgba(232,80,24,0.08);
+  margin-top: 3px;
+  display: inline-block;
+}
+.expand-arrow {
+  font-size: 11px;
+  color: var(--neon);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.obj-card.expanded .expand-arrow { transform: rotate(90deg); }
+
+.card-body {
+  padding: 13px 15px;
+}
+.obj-desc {
+  font-size: 12.5px;
+  color: var(--ink2);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+/* Max 패치 시뮬레이션 */
+.patch-sim {
+  background: #1a1c14;
+  border-radius: 3px;
+  padding: 14px;
+  margin-top: 10px;
+  border: 1px solid rgba(20,40,0,0.25);
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  position: relative;
+  min-height: 100px;
+}
+.obj-card.expanded .patch-sim { display: flex; }
+
+.max-obj {
+  background: #2a2c22;
+  border: 1px solid #4a4c40;
+  border-radius: 2px;
+  padding: 4px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #e0e0d0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  position: relative;
+  min-width: 60px;
+  user-select: none;
+}
+.max-obj:hover { border-color: rgba(255,200,100,0.6); color: #ccff00; }
+.max-obj.active { border-color: #ccff00; background: rgba(204,255,0,0.08); color: #ccff00; }
+.max-obj.triggered { animation: flash 0.15s ease; }
+@keyframes flash { 0%,100% { background: rgba(204,255,0,0.08); } 50% { background: rgba(204,255,0,0.35); } }
+
+.inlet-row, .outlet-row {
+  display: flex; gap: 4px; flex-wrap: wrap; align-items: center;
+}
+.io-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #4a4c40;
+  background: #2a2c22;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.io-dot.inlet { border-color: #8a8c80; }
+.io-dot.outlet { border-color: rgba(204,255,0,0.4); }
+.io-dot:hover { border-color: #ccff00; background: rgba(204,255,0,0.15); }
+
+.max-wire {
+  width: 2px; background: rgba(204,255,0,0.4);
+  margin: 0 auto; flex-shrink: 0;
+}
+
+.max-number {
+  background: #2a2c22;
+  border: 1px solid #4a4c40;
+  border-radius: 2px;
+  padding: 3px 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #ccff00;
+  min-width: 50px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.max-number:hover { border-color: #ccff00; }
+
+.max-toggle {
+  width: 24px; height: 24px;
+  border: 1.5px solid #4a4c40;
+  border-radius: 2px;
+  background: #2a2c22;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s ease;
+  font-size: 13px;
+  color: transparent;
+}
+.max-toggle.on { background: rgba(204,255,0,0.15); border-color: #ccff00; color: #ccff00; }
+.max-toggle:hover { border-color: #ccff00; }
+
+.max-bang {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(204,255,0,0.5);
+  background: #2a2c22;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s ease;
+  color: transparent;
+  font-size: 10px;
+}
+.max-bang:hover { border-color: #ccff00; background: rgba(204,255,0,0.08); }
+.max-bang.flash { background: rgba(204,255,0,0.4); color: var(--ink); animation: bangflash 0.1s ease; }
+@keyframes bangflash { 0% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+.max-slider-wrap { display: flex; flex-direction: column; gap: 4px; }
+.max-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 140px; height: 6px;
+  border-radius: 3px;
+  background: #3a3c30;
+  outline: none;
+  cursor: pointer;
+}
+.max-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 2px;
+  background: var(--neon);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(204,255,0,0.4);
+}
+.max-slider::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 2px;
+  background: var(--neon);
+  cursor: pointer;
+  border: none;
+}
+
+.max-msg {
+  background: #252720;
+  border: 1px solid #4a4c40;
+  border-radius: 2px;
+  padding: 3px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #c8c8b8;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.max-msg:hover { border-color: var(--neon); color: var(--neon); }
+.max-msg.sent { animation: flash 0.15s ease; }
+
+.sim-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: #8a8070;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.sim-output {
+  background: rgba(232,80,24,0.06);
+  border: 1px solid rgba(232,80,24,0.25);
+  border-radius: 2px;
+  padding: 4px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #ccff00;
+  min-width: 80px;
+  text-align: center;
+}
+
+.patch-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.patch-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.wire-h { height: 2px; width: 20px; background: rgba(204,255,0,0.4); }
+.wire-v { width: 2px; height: 16px; background: rgba(204,255,0,0.4); flex-shrink: 0; }
+
+/* ── 세부 속성 테이블 ── */
+.prop-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.prop-table tr { border-bottom: 1px solid rgba(0,0,0,0.08); }
+.prop-table td {
+  padding: 5px 8px;
+  font-size: 11.5px;
+}
+.prop-table td:first-child {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: var(--neon);
+  width: 90px;
+  font-weight: 600;
+}
+.prop-table td:last-child { color: var(--ink3); }
+
+/* ── 코드 블록 ── */
+.code-block {
+  background: #1a1c14;
+  border-radius: 3px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  color: #c8d0a0;
+  line-height: 1.7;
+  border-left: 2px solid rgba(204,255,0,0.3);
+}
+.code-block .cm { color: #5a6050; }
+.code-block .kw { color: var(--neon); font-weight: 600; }
+.code-block .val { color: var(--orange); }
+.code-block .str { color: #80c080; }
+
+/* ── 튜토리얼 섹션 내 구조 ── */
+.concepts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.concept-pill {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--neon);
+  border-radius: 2px;
+  padding: 10px 14px;
+}
+.cp-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--neon);
+  margin-bottom: 4px;
+}
+.cp-body { font-size: 12px; color: var(--ink3); line-height: 1.6; }
+
+/* ── 필터 카운트 ── */
+.filter-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  color: var(--ink3);
+  padding: 4px 64px;
+  background: var(--bg-deep);
+  border-bottom: 1px solid rgba(20,40,0,0.15);
+  display: none;
+}
+.filter-count.visible { display: block; }
+.filter-count span { color: var(--neon); font-weight: 700; }
+
+/* ── 오실로스코프 시뮬 ── */
+.scope-wrap {
+  width: 100%;
+  background: #0d0f0a;
+  border-radius: 3px;
+  border: 1px solid rgba(204,255,0,0.15);
+  overflow: hidden;
+  position: relative;
+}
+.scope-wrap canvas { display: block; width: 100%; height: 60px; }
+
+/* ── 카운터 시뮬 ── */
+.counter-display {
+  background: #1a1c14;
+  border-radius: 3px;
+  border: 1px solid rgba(204,255,0,0.3);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  margin-top: 8px;
+}
+.counter-val {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ccff00;
+  min-width: 40px;
+  text-align: center;
+  text-shadow: 0 0 12px rgba(204,255,0,0.5);
+}
+.counter-btn {
+  background: rgba(204,255,0,0.1);
+  border: 1px solid rgba(204,255,0,0.4);
+  border-radius: 2px;
+  padding: 5px 12px;
+  color: #ccff00;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.counter-btn:hover { background: var(--neon); color: var(--ink); }
+
+/* ── MIDI 건반 ── */
+.piano-wrap {
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.piano-key {
+  width: 28px; height: 70px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid #888;
+  border-radius: 0 0 3px 3px;
+  cursor: pointer;
+  transition: all 0.08s;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: #666;
+  flex-shrink: 0;
+}
+.piano-key.black {
+  width: 18px; height: 44px;
+  background: #1a1a14;
+  border-color: #333;
+  margin: 0 -9px;
+  z-index: 2;
+  color: #888;
+}
+.piano-key:hover, .piano-key.active { background: rgba(232,80,24,0.5); border-color: var(--neon); }
+.piano-key.black:hover, .piano-key.black.active { background: rgba(232,80,24,0.5); }
+.midi-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--neon); margin-top: 6px; }
+
+/* ── METRO/BPM 시뮬 ── */
+.metro-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.beat-dots {
+  display: flex;
+  gap: 6px;
+}
+.beat-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(204,255,0,0.4);
+  background: #1a1c14;
+  transition: all 0.05s;
+}
+.beat-dot.active { background: var(--neon); border-color: var(--neon); box-shadow: 0 0 8px rgba(232,80,24,0.5); }
+
+/* ── TAGS ── */
+.tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; padding: 2px 7px; border-radius: 1px; border: 1px solid; margin-right: 4px; margin-bottom: 3px; }
+
+/* ── 필터 상태 ── */
+.obj-card.flt-hidden { opacity: 0.1; transform: scale(0.98); pointer-events: none; }
+.section-block.flt-hidden { opacity: 0.2; }
+
+/* 인트로 철학 블록 */
+.philosophy {
+  margin: 0 64px 48px;
+  padding: 28px 32px;
+  background: rgba(0,0,0,0.08);
+  border-left: 4px solid var(--neon);
+  border-radius: 0 3px 3px 0;
+}
+.ph-text {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--ink2);
+  font-weight: 300;
+}
+.ph-text strong { font-weight: 900; color: var(--ink); }
+
+@media (max-width: 768px) {
+  .masthead, .section, .filter-bar, .filter-count, .philosophy { padding-left: 20px; padding-right: 20px; }
+  .philosophy { margin-left: 20px; margin-right: 20px; }
+  .obj-grid { grid-template-columns: 1fr; }
+  .concepts-grid { grid-template-columns: 1fr; }
+  .masthead h1 { padding-left: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── MASTHEAD ── -->
+<div class="masthead">
+  <div class="mh-kicker"><span>■</span> MAX 9 · 기초 오브젝트 레퍼런스 · 2026 &nbsp;<span style="opacity:0.45">|</span>&nbsp; hoonida studio</div>
+  <h1>Max / MSP<br><em>오브젝트 사전</em> <sup style="font-family:'IBM Plex Mono',monospace;font-size:0.28em;letter-spacing:2px;font-weight:700;opacity:0.55;vertical-align:super">Vol.1</sup></h1>
+  <p class="mh-desc">
+    데이터 흐름 프로그래밍의 기본 단위들. 오브젝트를 클릭하면 인터랙티브 시뮬레이션이 실행됩니다.
+  </p>
+  <blockquote class="mh-quote">
+    디지털 프로세스 제작 과정은 단순 도구에 숙련의 관점이 아니라,
+    그 프로세스 과정에 <strong>사고방식에서 다른 생각의 사고방식을 가지는 즐거움</strong>이다.
+  </blockquote>
+</div>
+
+<!-- ── PHILOSOPHY ── -->
+<div class="philosophy" style="margin-top:32px">
+  <p class="ph-text">
+    Max에서 모든 것은 <strong>오브젝트(Object)</strong>와 <strong>연결(Patch Cord)</strong>로 이루어진다.<br>
+    왼쪽 위의 <strong>인렛(inlet)</strong>으로 데이터가 들어오고, 아래 <strong>아웃렛(outlet)</strong>으로 나간다.<br>
+    <code style="font-family:'IBM Plex Mono';background:rgba(204,255,0,0.1);padding:1px 6px;border-radius:2px;color:var(--neon)">n = object 박스</code>
+    &nbsp;
+    <code style="font-family:'IBM Plex Mono';background:rgba(204,255,0,0.1);padding:1px 6px;border-radius:2px;color:var(--neon)">m = message 박스</code>
+  </p>
+</div>
+
+<!-- ── FILTER BAR ── -->
+<div class="filter-bar" id="filterBar">
+  <span class="filter-label">카테고리</span>
+  <button class="flt-btn active" data-filter="all">
+    <span class="flt-dot" style="background:rgba(20,40,0,0.4)"></span>전체
+  </button>
+  <button class="flt-btn" data-filter="data">
+    <span class="flt-dot" style="background:#1a0800"></span>데이터 타입
+  </button>
+  <button class="flt-btn" data-filter="ui">
+    <span class="flt-dot" style="background:rgba(255,255,255,0.7)"></span>UI 오브젝트
+  </button>
+  <button class="flt-btn" data-filter="math">
+    <span class="flt-dot" style="background:rgba(20,40,0,0.6)"></span>연산
+  </button>
+  <button class="flt-btn" data-filter="audio">
+    <span class="flt-dot" style="background:rgba(255,255,255,0.4)"></span>오디오 (MSP)
+  </button>
+  <button class="flt-btn" data-filter="flow">
+    <span class="flt-dot" style="background:rgba(20,40,0,0.5)"></span>흐름 제어
+  </button>
+  <button class="flt-btn" data-filter="advanced">
+    <span class="flt-dot" style="background:rgba(255,255,255,0.6)"></span>고급
+  </button>
+</div>
+<div class="filter-count" id="filterCount">⬡ <span id="fcNum">0</span>개 오브젝트 표시 중 · ESC = 전체</div>
+
+<!-- ══════════════════════════════════
+  SECTION 1: 데이터 타입
+══════════════════════════════════ -->
+<div class="section section-block" data-section="data">
+  <div class="sec-label">Section 01 · Data Types</div>
+  <div class="sec-h">데이터 타입</div>
+  <div class="sec-sub">Max에서 흐르는 데이터의 기본 단위 — int, float, bang, message</div>
+
+  <div class="concepts-grid">
+    <div class="concept-pill"><div class="cp-title">bang</div><div class="cp-body">신호를 보내는 가장 작은 단위. "지금 실행하라"는 트리거.</div></div>
+    <div class="concept-pill"><div class="cp-title">int / float</div><div class="cp-body">정수(i)와 부동소수점(f). 숫자 데이터의 두 가지 형태.</div></div>
+    <div class="concept-pill"><div class="cp-title">message</div><div class="cp-body">텍스트, 숫자, 리스트를 담는 봉투. 내용을 클릭하면 전송.</div></div>
+    <div class="concept-pill"><div class="cp-title">hot / cold inlet</div><div class="cp-body">왼쪽 인렛(hot)은 받으면 즉시 실행. 오른쪽(cold)은 저장만 함.</div></div>
+  </div>
+
+  <div class="obj-grid">
+
+    <!-- bang -->
+    <div class="obj-card" data-cat="data">
+      <div class="card-header">
+        <div class="obj-icon">b</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">button</div>
+          <div class="obj-type-badge">bang generator</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">클릭하거나 bang을 받으면 bang을 출력. "지금 실행"이라는 신호.</p>
+        <div class="patch-sim">
+          <div class="sim-label">Try it:</div>
+          <div class="patch-row">
+            <div class="patch-col">
+              <div class="max-bang" id="bang1" onclick="fireBang(event,'bang1','bangout1')">●</div>
+              <div class="wire-v"></div>
+              <div class="sim-output" id="bangout1">—</div>
+            </div>
+            <div style="margin-left:16px;font-family:'IBM Plex Mono';font-size:10px;color:#5a6050;line-height:1.7">
+              ← 원을 클릭하면<br>bang이 출력됩니다
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- int number -->
+    <div class="obj-card" data-cat="data">
+      <div class="card-header">
+        <div class="obj-icon">i</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">number (int)</div>
+          <div class="obj-type-badge">integer</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">정수를 표시하고 입출력. 드래그하거나 직접 입력해 값을 변경.</p>
+        <div class="patch-sim">
+          <div class="patch-row">
+            <div class="patch-col">
+              <div class="sim-label">INPUT</div>
+              <input type="number" class="max-number" id="numIn" value="0" style="width:70px" oninput="numFlow('numIn','numOut')">
+              <div class="wire-v"></div>
+              <div class="sim-output" id="numOut">0</div>
+              <div class="sim-label" style="margin-top:2px">OUTPUT</div>
+            </div>
+            <div style="margin-left:16px;font-family:'IBM Plex Mono';font-size:10px;color:#5a6050;line-height:1.7">
+              ← 숫자를 입력하면<br>아래로 흐릅니다<br><br>
+              <span style="color:var(--neon2)">hot inlet (왼쪽)</span><br>
+              값 받으면 즉시 출력
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- float flonum -->
+    <div class="obj-card" data-cat="data">
+      <div class="card-header">
+        <div class="obj-icon">f</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">flonum</div>
+          <div class="obj-type-badge">float</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">부동소수점 숫자 박스. 소수점 아래 값을 다룰 때 사용.</p>
+        <div class="patch-sim">
+          <div class="patch-row">
+            <div class="patch-col">
+              <input type="range" class="max-slider" id="floatSlider" min="0" max="1" step="0.01" value="0.5" oninput="updateFloat(this)">
+              <div class="wire-v"></div>
+              <div class="sim-output" id="floatOut">0.50</div>
+            </div>
+            <div style="margin-left:12px;font-family:'IBM Plex Mono';font-size:10px;color:#5a6050;line-height:1.7">
+              ← 슬라이더로<br>0.0~1.0 범위<br>소수점 출력
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- message -->
+    <div class="obj-card" data-cat="data">
+      <div class="card-header">
+        <div class="obj-icon">msg</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">message</div>
+          <div class="obj-type-badge">m box</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">고정된 데이터를 저장하고 클릭하면 전송. 리스트, 숫자, 텍스트 모두 가능.</p>
+        <div class="patch-sim">
+          <div class="sim-label">클릭해서 전송:</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:4px 0">
+            <div class="max-msg" onclick="sendMsg(this,'msgOut','bang')">bang</div>
+            <div class="max-msg" onclick="sendMsg(this,'msgOut','1 2 3 4 5')">1 2 3 4 5</div>
+            <div class="max-msg" onclick="sendMsg(this,'msgOut','hello max')">hello max</div>
+            <div class="max-msg" onclick="sendMsg(this,'msgOut','60')">60</div>
+          </div>
+          <div class="wire-v"></div>
+          <div class="sim-output" id="msgOut">—</div>
+        </div>
+        <table class="prop-table">
+          <tr><td>단축키</td><td><code style="font-family:'IBM Plex Mono';color:var(--neon)">M</code> — 새 메시지 박스</td></tr>
+          <tr><td>입력</td><td>왼쪽 인렛으로 값 받아 내용 업데이트</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+  SECTION 2: 흐름 제어
+══════════════════════════════════ -->
+<div class="section alt section-block" data-section="flow">
+  <div class="sec-label">Section 02 · Flow Control</div>
+  <div class="sec-h">흐름 제어</div>
+  <div class="sec-sub">데이터가 언제, 어디로 흘러갈지 결정하는 오브젝트들</div>
+
+  <div class="obj-grid">
+
+    <!-- metro / counter -->
+    <div class="obj-card" data-cat="flow">
+      <div class="card-header">
+        <div class="obj-icon">♩</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">metro</div>
+          <div class="obj-type-badge">metronome</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">일정 간격으로 bang을 반복 출력하는 메트로놈. toggle로 on/off 제어.</p>
+        <div class="patch-sim">
+          <div class="patch-row" style="align-items:flex-start;gap:16px">
+            <div class="patch-col">
+              <div class="sim-label">TOGGLE</div>
+              <div class="max-toggle" id="metroToggle" onclick="toggleMetro(this)">✕</div>
+              <div class="wire-v"></div>
+              <div class="max-obj" style="font-size:10px">metro <span id="metroBpm" style="color:var(--neon)">500</span>ms</div>
+              <div class="wire-v"></div>
+              <div class="beat-dots" id="beatDots">
+                <div class="beat-dot"></div><div class="beat-dot"></div>
+                <div class="beat-dot"></div><div class="beat-dot"></div>
+              </div>
+            </div>
+            <div class="patch-col" style="align-items:flex-start">
+              <div class="sim-label">BPM</div>
+              <input type="range" class="max-slider" min="100" max="1000" value="500" style="width:100px" oninput="setMetroBpm(this)">
+              <div class="sim-label" style="margin-top:4px">BANG COUNT</div>
+              <div class="sim-output" id="bangCount">0</div>
+            </div>
+          </div>
+        </div>
+        <table class="prop-table">
+          <tr><td>인렛 1</td><td>0 = stop, 1 = start (toggle 연결)</td></tr>
+          <tr><td>인렛 2</td><td>인터벌(ms) 변경</td></tr>
+          <tr><td>아웃렛</td><td>bang 출력</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- counter -->
+    <div class="obj-card" data-cat="flow">
+      <div class="card-header">
+        <div class="obj-icon">↑↓</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">counter</div>
+          <div class="obj-type-badge">counter 1 8</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">bang을 받을 때마다 1씩 카운트. 최솟값/최댓값 범위 지정 가능. <code style="font-family:'IBM Plex Mono';color:var(--neon)">counter 1 8</code> = 1~8 루프.</p>
+        <div class="patch-sim">
+          <div class="counter-display">
+            <button class="counter-btn" onclick="stepCounter()">BANG ↵</button>
+            <div class="counter-val" id="ctrVal">1</div>
+            <div style="font-family:'IBM Plex Mono';font-size:10px;color:#5a6050">/ 8</div>
+            <button class="counter-btn" onclick="resetCounter()">RESET</button>
+          </div>
+        </div>
+        <table class="prop-table">
+          <tr><td>인렛 1</td><td>bang — 카운트 증가</td></tr>
+          <tr><td>인렛 4</td><td>bang — 리셋</td></tr>
+          <tr><td>아웃렛 1</td><td>현재 카운트 값 출력</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- trigger -->
+    <div class="obj-card" data-cat="flow">
+      <div class="card-header">
+        <div class="obj-icon">t</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">trigger</div>
+          <div class="obj-type-badge">t b i / trigger bang int</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">하나의 입력을 여러 타입으로 동시에 출력. <strong>오른쪽에서 왼쪽 순서</strong>로 출력됨 (중요!).</p>
+        <div class="patch-sim">
+          <div class="patch-row">
+            <div class="patch-col">
+              <div class="max-msg" onclick="fireTrigger()">input</div>
+              <div class="wire-v"></div>
+              <div class="max-obj" style="font-size:10px">trigger b i</div>
+              <div style="display:flex;gap:16px;margin-top:4px">
+                <div class="patch-col"><div class="sim-label">출력 2 (int)</div><div class="sim-output" id="trig_i">—</div></div>
+                <div class="patch-col"><div class="sim-label">출력 1 (bang)</div><div class="sim-output" id="trig_b">—</div></div>
+              </div>
+            </div>
+            <div style="margin-left:12px;font-family:'IBM Plex Mono';font-size:10px;color:#5a6050;line-height:1.8">
+              ← 클릭 시<br>int 먼저,<br>bang 나중<br>(R→L 순서)
+            </div>
+          </div>
+        </div>
+        <div class="code-block">
+          <span class="cm">// 순서 보장이 필요할 때 핵심 오브젝트</span><br>
+          <span class="kw">t</span> b i &nbsp;&nbsp;<span class="cm">// bang, int 순으로 출력</span><br>
+          <span class="kw">t</span> b b b <span class="cm">// 3개 bang 동시 출력</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- pack / unpack -->
+    <div class="obj-card" data-cat="flow">
+      <div class="card-header">
+        <div class="obj-icon">[ ]</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">pack / unpack</div>
+          <div class="obj-type-badge">list operations</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc"><code style="font-family:'IBM Plex Mono';color:var(--neon)">pack</code>은 여러 값을 리스트로 묶고, <code style="font-family:'IBM Plex Mono';color:var(--neon)">unpack</code>은 리스트를 개별 값으로 분해.</p>
+        <div class="patch-sim">
+          <div class="patch-row" style="align-items:flex-start;gap:12px">
+            <div class="patch-col">
+              <div class="sim-label">pack 0 0 0</div>
+              <div style="display:flex;gap:4px">
+                <input type="number" class="max-number" style="width:42px" value="0" id="pk1" oninput="doPack()">
+                <input type="number" class="max-number" style="width:42px" value="0" id="pk2" oninput="doPack()">
+                <input type="number" class="max-number" style="width:42px" value="0" id="pk3" oninput="doPack()">
+              </div>
+              <div class="wire-v"></div>
+              <div class="sim-output" id="packOut" style="min-width:120px">0 0 0</div>
+            </div>
+          </div>
+        </div>
+        <table class="prop-table">
+          <tr><td>pack</td><td>여러 인렛 → 하나의 리스트 아웃렛</td></tr>
+          <tr><td>unpack</td><td>리스트 인렛 → 여러 아웃렛</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+  SECTION 3: 연산
+══════════════════════════════════ -->
+<div class="section section-block" data-section="math">
+  <div class="sec-label">Section 03 · Arithmetic</div>
+  <div class="sec-h">연산 오브젝트</div>
+  <div class="sec-sub">숫자를 더하고, 빼고, 곱하고, 나누는 기본 연산들. MSP 버전은 이름에 ~ 붙음.</div>
+
+  <div class="obj-grid">
+
+    <!-- +, -, *, / -->
+    <div class="obj-card" data-cat="math">
+      <div class="card-header">
+        <div class="obj-icon">±</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">+ &nbsp;- &nbsp;* &nbsp;/</div>
+          <div class="obj-type-badge">arithmetic operators</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">기본 사칙연산. 왼쪽 인렛(hot)이 값을 받으면 계산 후 출력.</p>
+        <div class="patch-sim">
+          <div class="patch-row" style="align-items:flex-end;gap:8px">
+            <div class="patch-col">
+              <div class="sim-label">A</div>
+              <input type="number" class="max-number" id="mathA" value="10" style="width:60px" oninput="calcMath()">
+            </div>
+            <div>
+              <select id="mathOp" onchange="calcMath()" style="background:#2a2c22;border:1px solid #4a4c40;color:var(--neon);font-family:'IBM Plex Mono';font-size:13px;padding:4px 8px;border-radius:2px;cursor:pointer">
+                <option>+</option><option>-</option><option>*</option><option>/</option>
+              </select>
+            </div>
+            <div class="patch-col">
+              <div class="sim-label">B</div>
+              <input type="number" class="max-number" id="mathB" value="5" style="width:60px" oninput="calcMath()">
+            </div>
+            <div style="font-size:13px;color:var(--neon2)">=</div>
+            <div class="sim-output" id="mathResult" style="min-width:70px">15</div>
+          </div>
+        </div>
+        <div class="code-block">
+          <span class="kw">+</span> 10 &nbsp; <span class="cm">// 오른쪽 기본값 10</span><br>
+          <span class="kw">!</span>/ &nbsp;&nbsp;&nbsp;<span class="cm">// 분모·분자 역순: b/a</span><br>
+          <span class="kw">!</span>- &nbsp;&nbsp;&nbsp;<span class="cm">// 역순 빼기: b-a</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- expr -->
+    <div class="obj-card" data-cat="math">
+      <div class="card-header">
+        <div class="obj-icon">fx</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">expr</div>
+          <div class="obj-type-badge">expression evaluator</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">수식을 텍스트로 직접 입력. <code style="font-family:'IBM Plex Mono';color:var(--neon)">$i1</code>=인렛1 정수, <code style="font-family:'IBM Plex Mono';color:var(--neon)">$f1</code>=인렛1 실수.</p>
+        <div class="patch-sim">
+          <div class="sim-label">식: 60 / $i1 * 4 * 1000 (BPM → ms 변환)</div>
+          <div class="patch-row" style="margin-top:6px">
+            <div class="patch-col">
+              <div class="sim-label">BPM 입력</div>
+              <input type="number" class="max-number" id="exprBpm" value="120" style="width:70px" oninput="calcExpr()">
+              <div class="wire-v"></div>
+              <div class="max-obj" style="font-size:9.5px">expr 60./$i1*4.*1000.</div>
+              <div class="wire-v"></div>
+              <div class="sim-output" id="exprOut">2000 ms</div>
+            </div>
+          </div>
+        </div>
+        <table class="prop-table">
+          <tr><td>$i1~$i9</td><td>인렛 1~9 (정수)</td></tr>
+          <tr><td>$f1~$f9</td><td>인렛 1~9 (실수)</td></tr>
+          <tr><td>함수</td><td>sin, cos, sqrt, abs, pow, min, max...</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- if -->
+    <div class="obj-card" data-cat="math">
+      <div class="card-header">
+        <div class="obj-icon">if</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">if</div>
+          <div class="obj-type-badge">conditional</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">조건 분기. 참이면 then 아웃렛, 거짓이면 else 아웃렛으로 출력.</p>
+        <div class="patch-sim">
+          <div class="sim-label">if $i1 &gt; 0 then $i1 else -100</div>
+          <div class="patch-row" style="margin-top:6px">
+            <div class="patch-col">
+              <input type="number" class="max-number" id="ifInput" value="5" style="width:70px" oninput="calcIf()">
+              <div class="wire-v"></div>
+              <div class="max-obj" style="font-size:9px">if $i1 &gt; 0 then $i1 else -100</div>
+              <div style="display:flex;gap:10px;margin-top:6px">
+                <div class="patch-col"><div class="sim-label">THEN</div><div class="sim-output" id="ifThen">5</div></div>
+                <div class="patch-col"><div class="sim-label">ELSE</div><div class="sim-output" id="ifElse">—</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- $ dollar -->
+    <div class="obj-card" data-cat="math">
+      <div class="card-header">
+        <div class="obj-icon">$</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">$1 argument</div>
+          <div class="obj-type-badge">message formatting</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">메시지 박스 안에서 <code style="font-family:'IBM Plex Mono';color:var(--neon)">$1</code>은 첫 번째 인렛 값으로 치환됨.</p>
+        <div class="patch-sim">
+          <div class="sim-label">메시지: "$1 10" → 입력값과 10을 합친 리스트</div>
+          <div class="patch-row" style="margin-top:6px">
+            <div class="patch-col">
+              <input type="number" class="max-number" id="dollarIn" value="45" style="width:70px" oninput="calcDollar()">
+              <div class="wire-v"></div>
+              <div class="max-msg">$1 10</div>
+              <div class="wire-v"></div>
+              <div class="sim-output" id="dollarOut">45 10</div>
+            </div>
+          </div>
+        </div>
+        <div class="code-block">
+          <span class="kw">$1</span> 10 &nbsp;&nbsp;<span class="cm">// 45 입력 → "45 10" 출력</span><br>
+          <span class="kw">$1</span> <span class="kw">$2</span> &nbsp;&nbsp;<span class="cm">// 두 값을 리스트로 출력</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+  SECTION 4: UI 오브젝트
+══════════════════════════════════ -->
+<div class="section alt section-block" data-section="ui">
+  <div class="sec-label">Section 04 · UI Objects</div>
+  <div class="sec-h">UI 오브젝트</div>
+  <div class="sec-sub">사용자가 직접 조작하는 인터페이스 오브젝트들</div>
+
+  <div class="obj-grid">
+
+    <!-- toggle + led -->
+    <div class="obj-card" data-cat="ui">
+      <div class="card-header">
+        <div class="obj-icon">t/l</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">toggle / led</div>
+          <div class="obj-type-badge">on/off indicator</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc"><code style="font-family:'IBM Plex Mono';color:var(--neon)">toggle</code>: 클릭시 0↔1 전환, 출력도 0/1. <code style="font-family:'IBM Plex Mono';color:var(--neon)">led</code>: 표시 전용 인디케이터.</p>
+        <div class="patch-sim">
+          <div class="patch-row" style="gap:20px">
+            <div class="patch-col">
+              <div class="sim-label">TOGGLE</div>
+              <div class="max-toggle" id="tog1" onclick="flipToggle('tog1','togOut1')">✕</div>
+              <div class="wire-v"></div>
+              <div class="sim-output" id="togOut1">0</div>
+            </div>
+            <div class="patch-col">
+              <div class="sim-label">LED</div>
+              <div id="led1" style="width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(204,255,0,0.4);background:#1a1c14;cursor:pointer;transition:all 0.1s" onclick="flipLed('led1')"></div>
+              <div style="font-family:'IBM Plex Mono';font-size:9px;color:#5a6050;margin-top:4px">표시 전용</div>
+            </div>
+          </div>
+        </div>
+        <table class="prop-table">
+          <tr><td>toggle</td><td>0 or 1 출력 / metro on·off에 자주 연결</td></tr>
+          <tr><td>led</td><td>입력값이 0이면 꺼짐, 나머지는 켜짐</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- dial -->
+    <div class="obj-card" data-cat="ui">
+      <div class="card-header">
+        <div class="obj-icon">◎</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">dial</div>
+          <div class="obj-type-badge">rotary control</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">원형 노브. 드래그로 0~127 범위 조절. 볼륨·파라미터 제어에 사용.</p>
+        <div class="patch-sim">
+          <div class="patch-row" style="gap:16px;align-items:center">
+            <div class="patch-col">
+              <div class="sim-label">DIAL (드래그)</div>
+              <div id="dialWrap" style="position:relative;width:56px;height:56px;cursor:ns-resize" onmousedown="startDial(event)">
+                <svg viewBox="0 0 56 56" style="width:100%;height:100%">
+                  <circle cx="28" cy="28" r="24" fill="#2a2c22" stroke="#4a4c40" stroke-width="1.5"/>
+                  <path id="dialArc" d="" stroke="#ccff00" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  <circle id="dialDot" cx="28" cy="8" r="3" fill="#ccff00"/>
+                </svg>
+              </div>
+            </div>
+            <div class="patch-col">
+              <div class="sim-label">OUTPUT</div>
+              <div class="sim-output" id="dialOut">64</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- slider + rslider -->
+    <div class="obj-card" data-cat="ui">
+      <div class="card-header">
+        <div class="obj-icon">⊟</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">slider / rslider</div>
+          <div class="obj-type-badge">range slider</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc"><code style="font-family:'IBM Plex Mono';color:var(--neon)">slider</code>: 단일값. <code style="font-family:'IBM Plex Mono';color:var(--neon)">rslider</code>: 범위(low~high) 두 값 동시 출력.</p>
+        <div class="patch-sim">
+          <div class="patch-col" style="width:100%;gap:8px">
+            <div class="sim-label">SLIDER (0–127)</div>
+            <input type="range" class="max-slider" style="width:100%" min="0" max="127" value="64" id="sld1" oninput="document.getElementById('sldOut').textContent=this.value">
+            <div class="sim-output" id="sldOut" style="align-self:flex-start">64</div>
+            <div class="sim-label" style="margin-top:6px">RSLIDER (범위 선택)</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="range" class="max-slider" style="width:80px" min="0" max="127" value="30" id="rsLo" oninput="updateRslider()">
+              <span style="font-family:'IBM Plex Mono';font-size:10px;color:#5a6050">~</span>
+              <input type="range" class="max-slider" style="width:80px" min="0" max="127" value="90" id="rsHi" oninput="updateRslider()">
+            </div>
+            <div class="sim-output" id="rsOut" style="align-self:flex-start">30~90</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- kslider -->
+    <div class="obj-card" data-cat="ui">
+      <div class="card-header">
+        <div class="obj-icon">🎹</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">kslider</div>
+          <div class="obj-type-badge">keyboard slider</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">MIDI 건반 UI. 클릭하면 MIDI 노트 번호와 벨로시티를 출력.</p>
+        <div class="patch-sim">
+          <div class="piano-wrap" id="pianoWrap"></div>
+          <div class="patch-row" style="margin-top:8px;gap:16px">
+            <div class="patch-col"><div class="sim-label">NOTE</div><div class="sim-output" id="kNote">—</div></div>
+            <div class="patch-col"><div class="sim-label">VELOCITY</div><div class="sim-output" id="kVel">—</div></div>
+            <div class="patch-col"><div class="sim-label">mtof →</div><div class="sim-output" id="kFreq">—</div></div>
+          </div>
+        </div>
+        <table class="prop-table">
+          <tr><td>아웃렛 1</td><td>MIDI 노트 번호 (0~127)</td></tr>
+          <tr><td>아웃렛 2</td><td>벨로시티 (0~127)</td></tr>
+          <tr><td>mtof</td><td>노트 번호 → Hz 변환 오브젝트</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+  SECTION 5: 오디오 (MSP)
+══════════════════════════════════ -->
+<div class="section section-block" data-section="audio">
+  <div class="sec-label">Section 05 · MSP Audio</div>
+  <div class="sec-h">오디오 오브젝트 (MSP)</div>
+  <div class="sec-sub">~ 기호가 붙은 오브젝트는 오디오 신호를 처리. 샘플 레이트로 연속 계산.</div>
+
+  <div class="concepts-grid">
+    <div class="concept-pill"><div class="cp-title">Signal vs Message</div><div class="cp-body">~(틸드)가 붙으면 오디오 신호. 초당 44100개 샘플로 연속 처리. 일반 박스와 직접 연결 불가.</div></div>
+    <div class="concept-pill"><div class="cp-title">ezdac~ / adc~</div><div class="cp-body">ezdac~은 DAC(스피커 출력). 더블클릭으로 오디오 on/off. adc~는 마이크 입력.</div></div>
+    <div class="concept-pill"><div class="cp-title">파형 종류</div><div class="cp-body">cycle~(사인파) · phasor~(톱니파) · rect~(구형파) · tri~(삼각파) · noise~(백색소음) · saw~</div></div>
+    <div class="concept-pill"><div class="cp-title">볼륨 제어</div><div class="cp-body">*~ 0.2 로 신호에 0.2를 곱해 볼륨 감소. 신호값은 -1.0~1.0 범위.</div></div>
+  </div>
+
+  <div class="obj-grid">
+
+    <!-- cycle~ -->
+    <div class="obj-card" data-cat="audio">
+      <div class="card-header">
+        <div class="obj-icon">∿</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">cycle~</div>
+          <div class="obj-type-badge">sine oscillator</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">사인파 오실레이터. 주파수(Hz)를 인렛으로 받아 -1.0~1.0 오디오 신호 출력.</p>
+        <div class="patch-sim">
+          <div class="patch-col" style="width:100%;gap:6px">
+            <div class="patch-row" style="align-items:center;gap:10px">
+              <div class="patch-col">
+                <div class="sim-label">FREQ (Hz)</div>
+                <input type="range" class="max-slider" min="20" max="2000" value="440" id="cycleFreq" oninput="updateScope()">
+              </div>
+              <div class="sim-output" id="cycleFreqOut">440 Hz</div>
+            </div>
+            <div class="scope-wrap">
+              <canvas id="scopeCanvas" width="300" height="60"></canvas>
+            </div>
+            <div style="font-family:'IBM Plex Mono';font-size:9px;color:#5a6050">scope~ 시뮬레이션 (실제 오디오 없음)</div>
+          </div>
+        </div>
+        <table class="prop-table">
+          <tr><td>인렛</td><td>주파수 (Hz) — 440 = A4</td></tr>
+          <tr><td>아웃렛</td><td>-1.0~1.0 오디오 신호</td></tr>
+          <tr><td>용도</td><td>기본 음향, FM 합성의 캐리어/모듈레이터</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 파형 비교 -->
+    <div class="obj-card" data-cat="audio">
+      <div class="card-header">
+        <div class="obj-icon">⋰</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">파형 오실레이터들</div>
+          <div class="obj-type-badge">noise~ phasor~ rect~ tri~</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">다양한 파형을 클릭해서 시각적으로 비교. 2개 이상 믹스하면 리듬 노이즈 제작 가능.</p>
+        <div class="patch-sim">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <button onclick="showWave('sine')" class="counter-btn" id="wbtn_sine">cycle~</button>
+            <button onclick="showWave('saw')" class="counter-btn" id="wbtn_saw">phasor~</button>
+            <button onclick="showWave('square')" class="counter-btn" id="wbtn_square">rect~</button>
+            <button onclick="showWave('tri')" class="counter-btn" id="wbtn_tri">tri~</button>
+            <button onclick="showWave('noise')" class="counter-btn" id="wbtn_noise">noise~</button>
+          </div>
+          <div class="scope-wrap">
+            <canvas id="waveCanvas" width="300" height="70"></canvas>
+          </div>
+          <div style="font-family:'IBM Plex Mono';font-size:10px;color:#5a6050;margin-top:4px" id="waveLabel">사인파 (cycle~) — 부드러운 순음</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- *~ 볼륨 -->
+    <div class="obj-card" data-cat="audio">
+      <div class="card-header">
+        <div class="obj-icon">×~</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">*~</div>
+          <div class="obj-type-badge">signal multiply</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">신호에 값을 곱함. <code style="font-family:'IBM Plex Mono';color:var(--neon)">*~ 0.2</code>는 볼륨을 20%로 줄임. 진폭 조절의 핵심.</p>
+        <div class="patch-sim">
+          <div class="patch-col" style="width:100%;gap:6px">
+            <div class="patch-row" style="align-items:center;gap:10px">
+              <div class="patch-col">
+                <div class="sim-label">볼륨 계수</div>
+                <input type="range" class="max-slider" min="0" max="100" value="50" id="volSlider" oninput="updateVol(this)">
+              </div>
+              <div class="sim-output" id="volOut">0.50</div>
+            </div>
+            <div class="scope-wrap">
+              <canvas id="volCanvas" width="300" height="60"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="code-block">
+          <span class="kw">cycle~</span> 440 <span class="cm">// 440Hz 사인파 생성</span><br>
+          <span class="kw">*~</span> 0.2 &nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 볼륨 20% (0.0~1.0)</span><br>
+          <span class="kw">ezdac~</span> &nbsp;&nbsp;&nbsp;<span class="cm">// 스피커 출력</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- subpatch -->
+    <div class="obj-card" data-cat="audio">
+      <div class="card-header">
+        <div class="obj-icon">p</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">subpatch</div>
+          <div class="obj-type-badge">p subpatch / p test</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">패치 안에 패치를 넣어 모듈화. <code style="font-family:'IBM Plex Mono';color:var(--neon)">p 이름</code>으로 생성. inlet/outlet으로 연결.</p>
+        <div class="patch-sim">
+          <div style="background:#0d0f0a;border:1px solid rgba(204,255,0,0.15);border-radius:3px;padding:12px;font-family:'IBM Plex Mono';font-size:10px;color:#6a6c5a;line-height:2">
+            <div style="border:1px solid #4a4c40;border-radius:2px;padding:4px 12px;background:#2a2c22;display:inline-block;color:#e0e0d0;margin-bottom:8px">p subpatch</div><br>
+            <span style="color:#4a6050">↓ 내부 구조:</span><br>
+            <span style="color:rgba(204,255,0,0.5)">inlet</span> → 처리 오브젝트들 → <span style="color:rgba(204,255,0,0.5)">outlet</span>
+          </div>
+        </div>
+        <table class="prop-table">
+          <tr><td>용도</td><td>복잡한 로직을 캡슐화해 패치 정리</td></tr>
+          <tr><td>inlet</td><td>서브패치 내부에 inlet 오브젝트</td></tr>
+          <tr><td>outlet</td><td>서브패치 내부에 outlet 오브젝트</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+  SECTION 6: 고급 오브젝트
+══════════════════════════════════ -->
+<div class="section alt section-block" data-section="advanced">
+  <div class="sec-label">Section 06 · Advanced</div>
+  <div class="sec-h">고급 오브젝트</div>
+  <div class="sec-sub">kslider + mtof 조합, function 커브, multislider, tempo 패턴 시퀀서</div>
+
+  <div class="obj-grid">
+
+    <!-- mtof -->
+    <div class="obj-card" data-cat="advanced">
+      <div class="card-header">
+        <div class="obj-icon">♪→</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">mtof</div>
+          <div class="obj-type-badge">midi to frequency</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">MIDI 노트 번호 → 주파수(Hz) 변환. 69 = 440Hz (A4). kslider와 주로 연결.</p>
+        <div class="patch-sim">
+          <div class="patch-row" style="gap:8px;align-items:center">
+            <div class="patch-col">
+              <div class="sim-label">MIDI NOTE</div>
+              <input type="number" class="max-number" id="mtofIn" value="69" min="0" max="127" style="width:70px" oninput="calcMtof()">
+              <div class="wire-v"></div>
+              <div class="max-obj" style="font-size:11px">mtof</div>
+              <div class="wire-v"></div>
+              <div class="sim-output" id="mtofOut">440.00 Hz</div>
+            </div>
+            <div style="font-family:'IBM Plex Mono';font-size:10px;color:#5a6050;line-height:1.9">
+              60 = C4 (261.6 Hz)<br>
+              69 = A4 (440.0 Hz)<br>
+              72 = C5 (523.3 Hz)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- tempo / pattern -->
+    <div class="obj-card" data-cat="advanced">
+      <div class="card-header">
+        <div class="obj-icon">↻</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">tempo</div>
+          <div class="obj-type-badge">tempo 120 1 16</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">BPM 기반 타이밍. <code style="font-family:'IBM Plex Mono';color:var(--neon)">tempo 120 1 16</code> = 120BPM, 1/16 노트 단위.</p>
+        <div class="patch-sim">
+          <div class="patch-col" style="width:100%;gap:8px">
+            <div class="patch-row" style="gap:10px;align-items:center">
+              <div class="patch-col"><div class="sim-label">BPM</div>
+                <input type="range" class="max-slider" min="60" max="200" value="120" id="tempoBpm" oninput="document.getElementById('tempoVal').textContent=this.value">
+              </div>
+              <div class="sim-output" id="tempoVal">120</div>
+              <div class="max-toggle" id="tempoTog" onclick="toggleTempo(this)">✕</div>
+            </div>
+            <div class="beat-dots" id="tempoDots" style="gap:5px">
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+            </div>
+            <div class="sim-label">1/16 노트 16 스텝</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- multislider -->
+    <div class="obj-card" data-cat="advanced">
+      <div class="card-header">
+        <div class="obj-icon">|||</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">multislider</div>
+          <div class="obj-type-badge">multi-value slider</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">여러 슬라이더를 한 오브젝트에. 시퀀서, 스펙트럼, 다차원 파라미터 제어에 활용.</p>
+        <div class="patch-sim">
+          <div class="patch-col" style="width:100%;gap:6px">
+            <div class="sim-label">MULTISLIDER (클릭/드래그해서 그리기)</div>
+            <canvas id="multiCanvas" width="260" height="80"
+              style="background:#1a1c14;border:1px solid rgba(204,255,0,0.15);cursor:crosshair;border-radius:2px;display:block;width:100%;height:80px"
+              onmousedown="startMulti(event)" onmousemove="drawMulti(event)" onmouseup="endMulti()"></canvas>
+            <div class="sim-output" id="multiOut" style="font-size:9.5px;text-align:left">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- counter + metro 연결 예제 -->
+    <div class="obj-card" data-cat="advanced">
+      <div class="card-header">
+        <div class="obj-icon">⬡</div>
+        <div class="obj-name-wrap">
+          <div class="obj-name">패치 예제: 카운터 시퀀서</div>
+          <div class="obj-type-badge">metro → counter → select</div>
+        </div>
+        <div class="expand-arrow">▶</div>
+      </div>
+      <div class="card-body">
+        <p class="obj-desc">metro → counter 1 8 → 8단계 시퀀서 구조. 실제 패치 파일의 핵심 패턴.</p>
+        <div class="patch-sim">
+          <div style="background:#0d0f0a;padding:14px;border-radius:3px;font-family:'IBM Plex Mono';font-size:10px;line-height:2.2;color:#6a6c5a;width:100%">
+            <div style="color:var(--neon);font-weight:700">toggle</div>
+            <div style="color:#4a6050;padding-left:12px">↓</div>
+            <div style="color:#c8c8b8">metro <span style="color:var(--neon)">500</span></div>
+            <div style="color:#4a6050;padding-left:12px">↓</div>
+            <div style="color:#c8c8b8">counter <span style="color:var(--neon)">1 8</span></div>
+            <div style="color:#4a6050;padding-left:12px">↓</div>
+            <div style="color:#c8c8b8">select <span style="color:var(--neon)">1 2 3 4 5 6 7 8</span></div>
+            <div style="color:#4a6050;padding-left:12px">↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓</div>
+            <div style="color:#c8c8b8">각 스텝 → 음 출력</div>
+          </div>
+          <div class="patch-row" style="margin-top:8px;gap:8px;align-items:center">
+            <div class="max-toggle" id="seqTog" onclick="toggleSeq(this)">✕</div>
+            <div class="sim-label">실행</div>
+            <div style="display:flex;gap:4px" id="seqDots">
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+              <div class="beat-dot"></div><div class="beat-dot"></div>
+            </div>
+            <div class="sim-output" id="seqStep">1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<div style="padding:32px 64px;background:rgba(20,40,0,0.1);border-top:2px solid rgba(20,40,0,0.15)">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted2);line-height:1.8">
+    <span style="color:var(--neon);font-weight:700">Max 9</span> · Cycling '74 · 
+    기초 오브젝트 레퍼런스 · 01_ex_MaxMSP.maxpat 기반 ·
+    실제 오디오 출력은 Max 애플리케이션에서만 가능
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════
+
+function toggleCard(card) {
+  const sim = card.querySelector('.patch-sim');
+  if (!sim) return;
+  card.classList.toggle('expanded');
+}
+
+
+
+function fireBang(e, id, outId) {
+  e.stopPropagation();
+  const el = document.getElementById(id);
+  const out = document.getElementById(outId);
+  el.classList.add('flash');
+  out.textContent = 'bang!';
+  out.style.color = 'var(--neon)';
+  setTimeout(() => { el.classList.remove('flash'); out.textContent = '—'; out.style.color = ''; }, 300);
+}
+
+function numFlow(inId, outId) {
+  document.getElementById(outId).textContent = document.getElementById(inId).value;
+}
+
+function updateFloat(el) {
+  document.getElementById('floatOut').textContent = parseFloat(el.value).toFixed(2);
+}
+
+function sendMsg(el, outId, val) {
+  const out = document.getElementById(outId);
+  el.classList.add('sent');
+  out.textContent = val;
+  out.style.color = 'var(--neon)';
+  setTimeout(() => { el.classList.remove('sent'); out.style.color = ''; }, 200);
+}
+
+// ── Counter ──
+let ctrCur = 1;
+function stepCounter() {
+  ctrCur = ctrCur >= 8 ? 1 : ctrCur + 1;
+  document.getElementById('ctrVal').textContent = ctrCur;
+}
+function resetCounter() {
+  ctrCur = 1;
+  document.getElementById('ctrVal').textContent = 1;
+}
+
+// ── Trigger ──
+function fireTrigger() {
+  const b = document.getElementById('trig_b');
+  const i = document.getElementById('trig_i');
+  i.textContent = '42'; i.style.color = 'var(--neon)';
+  setTimeout(() => {
+    b.textContent = 'bang!'; b.style.color = 'var(--neon)';
+    setTimeout(() => { b.style.color = ''; b.textContent = '—'; i.style.color = ''; }, 300);
+  }, 60);
+}
+
+// ── Pack ──
+function doPack() {
+  const a = document.getElementById('pk1').value || 0;
+  const b = document.getElementById('pk2').value || 0;
+  const c = document.getElementById('pk3').value || 0;
+  document.getElementById('packOut').textContent = `${a} ${b} ${c}`;
+}
+
+// ── Metro ──
+let metroTimer = null, beatIdx = 0, bangCnt = 0;
+function toggleMetro(el) {
+  el.classList.toggle('on');
+  const on = el.classList.contains('on');
+  el.textContent = on ? '✕' : '✕';
+  if (on) {
+    const bpm = parseInt(document.getElementById('metroBpm').textContent) || 500;
+    function tick() {
+      const dots = document.querySelectorAll('#beatDots .beat-dot');
+      dots.forEach((d,i) => d.classList.toggle('active', i === beatIdx));
+      beatIdx = (beatIdx + 1) % 4;
+      bangCnt++;
+      document.getElementById('bangCount').textContent = bangCnt;
+    }
+    tick();
+    metroTimer = setInterval(tick, parseInt(document.getElementById('metroBpm').textContent) || 500);
+  } else {
+    clearInterval(metroTimer);
+    document.querySelectorAll('#beatDots .beat-dot').forEach(d => d.classList.remove('active'));
+  }
+}
+function setMetroBpm(el) {
+  document.getElementById('metroBpm').textContent = el.value;
+  if (metroTimer) { clearInterval(metroTimer); metroTimer = setInterval(() => { toggleMetro(document.getElementById('metroToggle')); toggleMetro(document.getElementById('metroToggle')); }, 1); }
+}
+
+// ── Math ──
+function calcMath() {
+  const a = parseFloat(document.getElementById('mathA').value) || 0;
+  const b = parseFloat(document.getElementById('mathB').value) || 0;
+  const op = document.getElementById('mathOp').value;
+  let r = op === '+' ? a+b : op === '-' ? a-b : op === '*' ? a*b : b !== 0 ? (a/b).toFixed(3) : 'div/0';
+  document.getElementById('mathResult').textContent = r;
+}
+calcMath();
+
+// ── Expr (BPM → ms) ──
+function calcExpr() {
+  const bpm = parseFloat(document.getElementById('exprBpm').value) || 120;
+  const ms = (60 / bpm * 4 * 1000).toFixed(0);
+  document.getElementById('exprOut').textContent = ms + ' ms';
+}
+calcExpr();
+
+// ── If ──
+function calcIf() {
+  const v = parseInt(document.getElementById('ifInput').value);
+  const th = document.getElementById('ifThen');
+  const el = document.getElementById('ifElse');
+  if (v > 0) { th.textContent = v; th.style.color = 'var(--neon)'; el.textContent = '—'; el.style.color = ''; }
+  else { el.textContent = '-100'; el.style.color = 'var(--orange)'; th.textContent = '—'; th.style.color = ''; }
+}
+calcIf();
+
+// ── Dollar ──
+function calcDollar() {
+  const v = document.getElementById('dollarIn').value;
+  document.getElementById('dollarOut').textContent = v + ' 10';
+}
+
+// ── Toggle / LED ──
+function flipToggle(id, outId) {
+  const el = document.getElementById(id);
+  el.classList.toggle('on');
+  const on = el.classList.contains('on');
+  el.textContent = on ? '✕' : '✕';
+  document.getElementById(outId).textContent = on ? 1 : 0;
+}
+function flipLed(id) {
+  const el = document.getElementById(id);
+  const on = el.style.background === 'var(--neon)' || el.style.background === '#ccff00';
+  el.style.background = on ? '#1a1c14' : '#ccff00';
+  el.style.boxShadow = on ? '' : '0 0 10px rgba(204,255,0,0.6)';
+  el.style.borderColor = on ? 'rgba(204,255,0,0.4)' : 'var(--neon)';
+}
+
+// ── Dial ──
+let dialVal = 64, dialDragging = false, dialStartY = 0;
+function startDial(e) {
+  dialDragging = true; dialStartY = e.clientY;
+  document.addEventListener('mousemove', moveDial);
+  document.addEventListener('mouseup', endDial);
+  e.preventDefault();
+}
+function moveDial(e) {
+  if (!dialDragging) return;
+  dialVal = Math.max(0, Math.min(127, dialVal - (e.clientY - dialStartY) * 0.5));
+  dialStartY = e.clientY;
+  updateDialVis();
+}
+function endDial() { dialDragging = false; document.removeEventListener('mousemove', moveDial); document.removeEventListener('mouseup', endDial); }
+function updateDialVis() {
+  document.getElementById('dialOut').textContent = Math.round(dialVal);
+  const angle = (dialVal / 127) * 270 - 135;
+  const r = 24, cx = 28, cy = 28;
+  const startA = -135 * Math.PI / 180;
+  const endA = angle * Math.PI / 180;
+  const x1 = cx + r * Math.cos(startA), y1 = cy + r * Math.sin(startA);
+  const x2 = cx + r * Math.cos(endA), y2 = cy + r * Math.sin(endA);
+  const large = angle - (-135) > 180 ? 1 : 0;
+  document.getElementById('dialArc').setAttribute('d', `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`);
+  const dotA = endA;
+  document.getElementById('dialDot').setAttribute('cx', cx + (r-4) * Math.cos(dotA));
+  document.getElementById('dialDot').setAttribute('cy', cy + (r-4) * Math.sin(dotA));
+}
+updateDialVis();
+
+// ── Rslider ──
+function updateRslider() {
+  const lo = document.getElementById('rsLo').value;
+  const hi = document.getElementById('rsHi').value;
+  document.getElementById('rsOut').textContent = `${Math.min(lo,hi)}~${Math.max(lo,hi)}`;
+}
+
+// ── Piano ──
+const noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const octaveStart = 4; // C4 = MIDI 60
+const pianoWrap = document.getElementById('pianoWrap');
+for (let i = 0; i < 14; i++) {
+  const midi = 60 + i;
+  const name = noteNames[midi % 12];
+  const isBlack = name.includes('#');
+  const key = document.createElement('div');
+  key.className = 'piano-key' + (isBlack ? ' black' : '');
+  key.textContent = isBlack ? '' : name + (Math.floor(midi / 12) - 1);
+  key.dataset.midi = midi;
+  key.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.piano-key').forEach(k => k.classList.remove('active'));
+    key.classList.add('active');
+    const n = parseInt(key.dataset.midi);
+    const vel = 100;
+    const hz = 440 * Math.pow(2, (n - 69) / 12);
+    document.getElementById('kNote').textContent = n;
+    document.getElementById('kVel').textContent = vel;
+    document.getElementById('kFreq').textContent = hz.toFixed(1) + ' Hz';
+    setTimeout(() => key.classList.remove('active'), 300);
+  });
+  pianoWrap.appendChild(key);
+}
+
+// ── mtof ──
+function calcMtof() {
+  const n = parseInt(document.getElementById('mtofIn').value) || 69;
+  const hz = 440 * Math.pow(2, (n - 69) / 12);
+  document.getElementById('mtofOut').textContent = hz.toFixed(2) + ' Hz';
+}
+calcMtof();
+
+// ── Scope Canvas ──
+function drawScope(canvasId, freq, amp) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.offsetWidth || 260, h = canvas.offsetHeight || 60;
+  canvas.width = w; canvas.height = h;
+  ctx.fillStyle = '#0d0f0a';
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(204,255,0,0.15)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+  ctx.strokeStyle = '#ccff00';
+  ctx.shadowColor = 'rgba(204,255,0,0.4)'; ctx.shadowBlur = 4;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const t = x / w;
+    const y = h/2 - (h/2 - 4) * amp * Math.sin(2 * Math.PI * freq * t * 3);
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+function updateScope() {
+  const f = parseInt(document.getElementById('cycleFreq').value);
+  document.getElementById('cycleFreqOut').textContent = f + ' Hz';
+  const normF = f / 2000;
+  drawScope('scopeCanvas', normF * 4 + 0.2, 0.85);
+}
+
+// ── Vol Canvas ──
+function updateVol(el) {
+  const v = el.value / 100;
+  document.getElementById('volOut').textContent = v.toFixed(2);
+  const canvas = document.getElementById('volCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.offsetWidth || 260, h = canvas.offsetHeight || 60;
+  canvas.width = w; canvas.height = h;
+  ctx.fillStyle = '#0d0f0a';
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = '#ccff00';
+  ctx.shadowColor = 'rgba(204,255,0,0.4)'; ctx.shadowBlur = 4;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const t = x / w;
+    const y = h/2 - (h/2 - 4) * v * Math.sin(2 * Math.PI * 2 * t);
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke(); ctx.shadowBlur = 0;
+}
+
+// ── Wave shapes ──
+let currentWave = 'sine';
+const waveDescs = {
+  sine: '사인파 (cycle~) — 부드러운 순음',
+  saw: '톱니파 (phasor~) — 거친 풍부한 배음',
+  square: '구형파 (rect~) — 날카로운 사각파',
+  tri: '삼각파 (tri~) — 부드럽고 중간톤',
+  noise: '백색소음 (noise~) — 모든 주파수 포함'
+};
+function showWave(type) {
+  currentWave = type;
+  document.querySelectorAll('[id^="wbtn_"]').forEach(b => b.style.background = '');
+  const btn = document.getElementById('wbtn_' + type);
+  if (btn) { btn.style.background = 'var(--neon)'; btn.style.color = 'var(--ink)'; }
+  document.getElementById('waveLabel').textContent = waveDescs[type] || '';
+  drawWave(type);
+}
+function drawWave(type) {
+  const canvas = document.getElementById('waveCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.offsetWidth || 260, h = canvas.offsetHeight || 70;
+  canvas.width = w; canvas.height = h;
+  ctx.fillStyle = '#0d0f0a'; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = '#ccff00'; ctx.shadowColor = 'rgba(204,255,0,0.4)'; ctx.shadowBlur = 3;
+  ctx.lineWidth = 1.5; ctx.beginPath();
+  const cycles = 3;
+  for (let x = 0; x < w; x++) {
+    const t = (x / w) * cycles;
+    const frac = t % 1;
+    let y;
+    if (type === 'sine') y = Math.sin(2 * Math.PI * t);
+    else if (type === 'saw') y = 2 * frac - 1;
+    else if (type === 'square') y = frac < 0.5 ? 1 : -1;
+    else if (type === 'tri') y = frac < 0.5 ? 4 * frac - 1 : 3 - 4 * frac;
+    else y = (Math.random() * 2 - 1) * 0.8;
+    const py = h/2 - (h/2 - 5) * y;
+    x === 0 ? ctx.moveTo(x, py) : ctx.lineTo(x, py);
+  }
+  ctx.stroke(); ctx.shadowBlur = 0;
+}
+
+// ── Multislider ──
+const multiVals = new Array(16).fill(64);
+let multiDrawing = false;
+function startMulti(e) { multiDrawing = true; drawMulti(e); }
+function endMulti() { multiDrawing = false; }
+function drawMulti(e) {
+  if (!multiDrawing) return;
+  const canvas = document.getElementById('multiCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const idx = Math.floor(x / rect.width * 16);
+  const val = Math.round((1 - y / rect.height) * 127);
+  if (idx >= 0 && idx < 16) multiVals[idx] = Math.max(0, Math.min(127, val));
+  renderMulti();
+  document.getElementById('multiOut').textContent = multiVals.join(' ');
+}
+function renderMulti() {
+  const canvas = document.getElementById('multiCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.offsetWidth, h = canvas.offsetHeight;
+  canvas.width = w; canvas.height = h;
+  ctx.fillStyle = '#0d0f0a'; ctx.fillRect(0, 0, w, h);
+  const bw = w / 16;
+  multiVals.forEach((v, i) => {
+    const bh = (v / 127) * h;
+    ctx.fillStyle = `rgba(204,255,0,${0.3 + v/127*0.5})`;
+    ctx.fillRect(i * bw + 1, h - bh, bw - 2, bh);
+    ctx.strokeStyle = 'rgba(204,255,0,0.6)'; ctx.lineWidth = 0.5;
+    ctx.strokeRect(i * bw + 1, h - bh, bw - 2, bh);
+  });
+}
+renderMulti();
+
+// ── Sequencer ──
+let seqTimer = null, seqStep = 0;
+function toggleSeq(el) {
+  el.classList.toggle('on');
+  const on = el.classList.contains('on');
+  if (on) {
+    function tick() {
+      const dots = document.querySelectorAll('#seqDots .beat-dot');
+      dots.forEach((d,i) => d.classList.toggle('active', i === seqStep));
+      document.getElementById('seqStep').textContent = seqStep + 1;
+      seqStep = (seqStep + 1) % 8;
+    }
+    tick();
+    seqTimer = setInterval(tick, 60000 / 120 / 2);
+  } else {
+    clearInterval(seqTimer);
+    document.querySelectorAll('#seqDots .beat-dot').forEach(d => d.classList.remove('active'));
+  }
+}
+
+// ── Tempo ──
+let tempoTimer = null, tempoStep = 0;
+function toggleTempo(el) {
+  el.classList.toggle('on');
+  const on = el.classList.contains('on');
+  if (on) {
+    function tick() {
+      const dots = document.querySelectorAll('#tempoDots .beat-dot');
+      dots.forEach((d,i) => d.classList.toggle('active', i === tempoStep));
+      tempoStep = (tempoStep + 1) % 16;
+    }
+    tick();
+    const bpm = parseInt(document.getElementById('tempoBpm').value) || 120;
+    tempoTimer = setInterval(tick, 60000 / bpm / 4);
+  } else {
+    clearInterval(tempoTimer);
+    document.querySelectorAll('#tempoDots .beat-dot').forEach(d => d.classList.remove('active'));
+  }
+}
+
+// ── 카드 헤더 클릭 이벤트 (이벤트 위임 방식) ──
+document.addEventListener('click', function(e) {
+  // card-header 또는 그 자식 클릭 시
+  const header = e.target.closest('.card-header');
+  if (header) {
+    const card = header.closest('.obj-card');
+    if (card) card.classList.toggle('expanded');
+    return;
+  }
+  // card-body 내부 클릭은 아무 것도 하지 않음 (버블링 자연 허용, 카드 토글 없음)
+});
+
+// ── Filter ──
+document.querySelectorAll('.flt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.flt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const allCards = document.querySelectorAll('.obj-card');
+    const fc = document.getElementById('filterCount');
+    if (f === 'all') {
+      allCards.forEach(c => c.classList.remove('flt-hidden'));
+      fc.classList.remove('visible'); return;
+    }
+    let cnt = 0;
+    allCards.forEach(c => {
+      const match = c.dataset.cat === f;
+      c.classList.toggle('flt-hidden', !match);
+      if (match) cnt++;
+    });
+    document.getElementById('fcNum').textContent = cnt;
+    fc.classList.add('visible');
+    const first = document.querySelector('.obj-card:not(.flt-hidden)');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelector('.flt-btn[data-filter="all"]')?.click();
+});
+
+// ── Init canvases after load ──
+window.addEventListener('load', () => {
+  updateScope();
+  updateVol(document.getElementById('volSlider'));
+  showWave('sine');
+  updateDialVis();
+});
+
+// scope 재렌더링
+const scopeObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { updateScope(); showWave(currentWave); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.scope-wrap').forEach(el => scopeObs.observe(el));
+</script>
+</body>
+</html>
